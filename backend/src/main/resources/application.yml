@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: eCommerce-Web-Service
+
+jwt:
+  secret: c2VjcmV0LWtleS1mb3ItanNvbi13ZWItdG9rZW4tc2lnbmluZy1rZXktZm9yLXNwcmluZy1zZWN1cml0eS1qd3Q=
+  token-validity-in-seconds: 86400 # JWT 토큰의 유효 기간
+  issuer: eCommerce-Web-Service
+
+logging:
+  level:
+    com.example.ecommercewebservice: DEBUG
+    org.springframework.security: INFO
