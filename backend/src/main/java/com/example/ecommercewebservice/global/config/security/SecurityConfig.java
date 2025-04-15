@@ -1,4 +1,4 @@
-package com.example.ecommercewebservice.global.config;
+package com.example.ecommercewebservice.global.config.security;
 
 import com.example.ecommercewebservice.global.exception.security.CustomAccessDeniedHandler;
 import com.example.ecommercewebservice.global.exception.security.CustomAuthenticationEntryPoint;
