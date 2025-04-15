@@ -22,4 +22,11 @@ public interface UserService {
      */
     LoginResponse login(LoginRequest loginRequest);
 
+    /**
+     * 사용자 로그아웃 처리
+     * 
+     * @param token 무효화할 JWT 토큰
+     */
+    void logout(String token);
+
 }

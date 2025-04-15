@@ -39,22 +39,29 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public User signup(SignupRequest signupRequest) {
-        if (userRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
-            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+        // 이메일 중복 검사
+        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        // 새 사용자 생성
+        // 사용자명 중복 검사
+        if (userRepository.existsByUsername(signupRequest.getUsername())) {
+            throw new BusinessException(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+
+        // 사용자 엔티티 생성 및 저장
         User user = User.builder()
                 .email(signupRequest.getEmail())
-                .username(signupRequest.getUsername())
-                .password(passwordEncoder.encode(signupRequest.getPassword())) // 비밀번호 암호화
-                .address(signupRequest.getAddress())
+                .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .phoneNumber(signupRequest.getPhoneNumber())
+                .address(signupRequest.getAddress())
+                .username(signupRequest.getUsername())
                 .roles(Collections.singletonList(UserRole.USER.getRole()))
                 .build();
 
+        log.info("새로운 사용자의 회원가입: {}", signupRequest.getEmail());
         return userRepository.save(user);
     }
 
@@ -86,6 +93,28 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             log.error("Login failed for user: {}", loginRequest.getEmail(), e);
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
+        }
+    }
+
+    /**
+     * 사용자 로그아웃 처리
+     * JWT 토큰을 무효화하여 더 이상 사용할 수 없게 함
+     *
+     * @param token 무효화할 JWT 토큰
+     */
+    @Override
+    public void logout(String token) {
+        if (token != null && !token.isEmpty()) {
+            try {
+                Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                log.info("사용자 로그아웃: {}", authentication.getName());
+                jwtTokenProvider.invalidateToken(token);
+            } catch (Exception e) {
+                log.error("로그아웃 실패", e);
+                throw new BusinessException(ErrorCode.INVALID_TOKEN);
+            }
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
     }
 }

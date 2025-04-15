@@ -3,6 +3,7 @@ package com.example.ecommercewebservice.global.util;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.io.Decoders;
+
+import com.example.ecommercewebservice.domain.token.repository.TokenRepository;
 
 import java.security.Key;
 import java.util.Arrays;
@@ -27,9 +30,16 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
 
-    private final Key key;
-    private final long tokenValidityInMilliseconds;
-    private final String issuer;
+    private Key key;
+    private long tokenValidityInMilliseconds;
+    private String issuer;
+    private TokenRepository tokenRepository;
+
+    /**
+     * 기본 생성자
+     */
+    public JwtTokenProvider() {
+    }
 
     /**
      * JWT 토큰 제공자 생성자
@@ -38,23 +48,28 @@ public class JwtTokenProvider {
      * @param secret JWT 서명에 사용되는 비밀 키
      * @param tokenValidityInSeconds 토큰 유효 시간(초)
      * @param issuer JWT 토큰의 발행자
+     * @param tokenRepository 토큰 관리 저장소
      */
+    @Autowired
     public JwtTokenProvider(
         @Value("${jwt.secret}") String secret,
         @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds,
-        @Value("${jwt.issuer}") String issuer) {
+        @Value("${jwt.issuer}") String issuer,
+        TokenRepository tokenRepository) {
         
         // Base64로 인코딩된 시크릿 키를 디코딩하여 사용
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
         this.issuer = issuer;
+        this.tokenRepository = tokenRepository;
         
         log.info("JWT Token Provider initialized with issuer: {}", issuer);
     }
 
     /**
      * 사용자 인증 정보를 기반으로 JWT 토큰 생성
+     * Redis에 토큰을 저장하여 관리
      * 
      * @param authentication 인증된 사용자 정보
      * @return 생성된 JWT 토큰 문자열
@@ -67,7 +82,7 @@ public class JwtTokenProvider {
             .map(GrantedAuthority::getAuthority)
             .collect(Collectors.joining(","));
 
-        return Jwts.builder()
+        String token = Jwts.builder()
             .setSubject(authentication.getName())
             .claim("auth", authorities)
             .setIssuer(issuer)
@@ -75,6 +90,11 @@ public class JwtTokenProvider {
             .setExpiration(validity)
             .signWith(key, SignatureAlgorithm.HS512)
             .compact();
+        
+        // Redis에 토큰 저장
+        tokenRepository.saveToken(authentication.getName(), token, this.tokenValidityInMilliseconds);
+        
+        return token;
     }
 
     /**
@@ -102,12 +122,20 @@ public class JwtTokenProvider {
 
     /**
      * JWT 토큰 유효성 검증
+     * Redis에서 토큰의 유효성 확인 후 JWT 서명, 만료 여부 검증
      * 
      * @param token 검증할 JWT 토큰
      * @return 토큰이 유효하면 true, 그렇지 않으면 false
      */
     public boolean validateToken(String token) {
         try {
+            // Redis에서 토큰 유효성 확인
+            if (!tokenRepository.validateToken(token)) {
+                log.warn("Redis 또는 Blacklist에 저장된 토큰이 유효하지 않음");
+                return false;
+            }
+
+            // JWT 서명 및 만료 여부 검증
             Jws<Claims> claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -115,20 +143,31 @@ public class JwtTokenProvider {
 
             // 토큰 발행자 확인
             if (!claims.getBody().getIssuer().equals(issuer)) {
-                log.warn("Invalid JWT issuer");
+                log.warn("토큰 발행자와 다릅니다.");
                 return false;
             }
 
             return true;
         } catch (SecurityException | MalformedJwtException e) {
-            log.warn("Invalid JWT signature");
+            log.warn("JWT 서명 검증 실패");
         } catch (ExpiredJwtException e) {
-            log.warn("Expired JWT token");
+            log.warn("JWT 토큰 만료");
+            // 만료된 토큰은 Redis에서도 제거
+            tokenRepository.invalidateToken(token);
         } catch (UnsupportedJwtException e) {
-            log.warn("Unsupported JWT token");
+            log.warn("지원되지 않는 토큰입니다.");
         } catch (IllegalArgumentException e) {
             log.warn("JWT token compact of handler are invalid");
         }
         return false;
+    }
+    
+    /**
+     * 토큰 무효화 (로그아웃)
+     * 
+     * @param token 무효화할 JWT 토큰
+     */
+    public void invalidateToken(String token) {
+        tokenRepository.invalidateToken(token);
     }
 } 
