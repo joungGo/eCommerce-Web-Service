@@ -58,4 +58,4 @@ jobs:
         if: always()  # 항상 실행하도록 설정 (성공 여부에 관계없이)
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'  # 테스트 결과 파일 경로
-          token: ${{ github.token }}  # GitHub 인증 토큰을 사용하여 API 호출
+          token: ${{ secrets.MY_PERSONAL_ACCESS_TOKEN }}  # GitHub 인증 토큰을 GitHub Secrets에서 가져오기
