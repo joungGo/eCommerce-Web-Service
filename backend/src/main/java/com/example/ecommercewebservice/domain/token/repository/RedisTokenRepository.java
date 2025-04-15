@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -61,19 +60,18 @@ public class RedisTokenRepository implements TokenRepository {
         if (username != null) {
             // 남은 TTL 확인
             Duration remainingTtl = redisCommon.getRemainingTTL(TOKEN_KEY + token);
-            if (remainingTtl != null) {
-                // 블랙리스트에 추가 (같은 TTL로 설정)
-                redisCommon.setData(BLACKLIST_KEY + token, "revoked");
-                redisCommon.setExpireAt(BLACKLIST_KEY + token, 
-                    java.time.LocalDateTime.now().plusSeconds(remainingTtl.getSeconds()));
-                log.debug("토큰 블랙리스트 등록 완료, TTL: {} 초", remainingTtl.getSeconds());
-            }
+            
+            // 블랙리스트에 추가 (TTL이 null이면 기본값 24시간으로 설정)
+            Duration blacklistTtl = remainingTtl != null ? remainingTtl : Duration.ofHours(24);
+            redisCommon.setDataWithTTL(BLACKLIST_KEY + token, "revoked", blacklistTtl);
+            log.debug("토큰 블랙리스트 등록 완료, TTL: {} 초", blacklistTtl.getSeconds());
+            
+            // 토큰 키 즉시 삭제
+            redisCommon.deleteData(TOKEN_KEY + token);
+            log.debug("토큰 삭제 완료");
+        } else {
+            log.debug("토큰이 이미 만료되었거나 존재하지 않습니다: {}", token);
         }
-        
-        // 토큰 키 삭제
-        redisCommon.getData(TOKEN_KEY + token, String.class); // 삭제 전 확인
-        // RedisCommon에 직접적인 삭제 메서드가 없으므로 만료시간을 0으로 설정하여 즉시 만료
-        redisCommon.setExpireAt(TOKEN_KEY + token, java.time.LocalDateTime.now());
     }
     
     @Override
@@ -84,11 +82,10 @@ public class RedisTokenRepository implements TokenRepository {
         if (allKeys != null) {
             for (String key : allKeys) {
                 if (key.startsWith(TOKEN_KEY)) {
-                    String tokenKey = key;
-                    String storedUsername = redisCommon.getData(tokenKey, String.class);
+                    String storedUsername = redisCommon.getData(key, String.class);
                     
                     if (username.equals(storedUsername)) {
-                        String token = tokenKey.substring(TOKEN_KEY.length());
+                        String token = key.substring(TOKEN_KEY.length());
                         invalidateToken(token);
                     }
                 }
