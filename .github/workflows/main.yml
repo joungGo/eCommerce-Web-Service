@@ -27,9 +27,10 @@ jobs:
         image: redis:latest  # Redis Docker 이미지 사용
         ports:
           - 6379:6379  # Redis 포트 매핑
+        command: ["redis-server", "--requirepass", "${{ secrets.REDIS_PASSWORD }}"]  # Redis 비밀번호 설정
         options: --health-cmd="redis-cli -a ${{ secrets.REDIS_PASSWORD }} ping" --health-interval=10s --health-timeout=5s --health-retries=3  # Redis의 상태를 확인하는 옵션
         env:
-          REDIS_PASSWORD: pk2258  # Redis 비밀번호 설정
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}  # Redis 비밀번호를 GitHub Secrets에서 가져오기
 
     steps:
       - name: 리포지토리를 가져옵니다
@@ -52,11 +53,10 @@ jobs:
         if: always()  # 항상 실행하도록 설정 (성공 여부에 관계없이)
         with:
           files: '**/build/test-results/test/TEST-*.xml'  # 테스트 결과 파일 경로를 지정
-          fields: repo, workflow, write:check-run
 
       - name: 테스트 실패 시, 실패한 코드 라인에 Check 코멘트를 등록합니다
         uses: mikepenz/action-junit-report@v3  # 테스트 실패 시, 실패한 코드 라인에 체크 코멘트를 등록하는 액션
         if: always()  # 항상 실행하도록 설정 (성공 여부에 관계없이)
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'  # 테스트 결과 파일 경로
-          token: ${{ github.token }}  # GitHub 인증 토큰을 사용하여 API 호출
+          token: ${{ secrets.MY_PERSONAL_ACCESS_TOKEN }}  # GitHub 인증 토큰을 GitHub Secrets에서 가져오기
