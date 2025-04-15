@@ -1,7 +1,10 @@
 package com.example.ecommercewebservice.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,7 +15,6 @@ import java.util.stream.Collectors;
 import com.example.ecommercewebservice.domain.cart.entity.CartItem;
 import com.example.ecommercewebservice.domain.order.entity.Order;
 import com.example.ecommercewebservice.domain.review.entity.Review;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
 
     @Id
@@ -42,17 +45,21 @@ public class User implements UserDetails {
 
     private String address;
 
-    private String profileImage;
+//    private String profileImage;
 
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<CartItem> cartItems = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Review> reviews = new ArrayList<>();
 
@@ -64,17 +71,26 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))// SimpleGrantedAuthority는 Spring Security에서 권한을 표현하는 클래스입니다.
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 사용자 식별자를 반환
-     * 이메일을 사용자 식별자로 사용
-     */
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
     @Override
     public String getUsername() {
         return this.email;
+    }
+
+    /**
+     * 사용자의 실제 이름을 반환
+     * @return 사용자의 실제 이름
+     */
+    public String getActualUsername() {
+        return this.username;
     }
 
     /**

@@ -3,7 +3,7 @@ package com.example.ecommercewebservice.domain.user.controller;
 import com.example.ecommercewebservice.domain.user.dto.LoginRequest;
 import com.example.ecommercewebservice.domain.user.dto.LoginResponse;
 import com.example.ecommercewebservice.domain.user.dto.SignupRequest;
-import com.example.ecommercewebservice.domain.user.dto.UserResponse;
+import com.example.ecommercewebservice.domain.user.dto.SignupResponse;
 import com.example.ecommercewebservice.domain.user.entity.User;
 import com.example.ecommercewebservice.domain.user.service.UserService;
 import com.example.ecommercewebservice.global.constant.MessageConstants;
@@ -25,13 +25,13 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<RsData<UserResponse>> signup(@Valid @RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<RsData<SignupResponse>> signup(@Valid @RequestBody SignupRequest signupRequest) {
         // 회원가입 로직 구현 - 예외는 GlobalExceptionHandler에서 처리
         User user = userService.signup(signupRequest);
 
         // 성공 시 - 사용자 정보를 UserResponse 객체로 변환하여 반환
-        UserResponse userResponse = UserResponse.from(user);
-        RsData<UserResponse> rsData = new RsData<>(String.valueOf(HttpStatus.OK.value()), MessageConstants.SIGNUP_SUCCESS, userResponse);
+        SignupResponse signupResponse = SignupResponse.from(user);
+        RsData<SignupResponse> rsData = new RsData<>(String.valueOf(HttpStatus.OK.value()), MessageConstants.SIGNUP_SUCCESS, signupResponse);
         return ResponseEntity.ok(rsData);
     }
 

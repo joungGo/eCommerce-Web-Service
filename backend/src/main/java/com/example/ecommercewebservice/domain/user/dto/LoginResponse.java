@@ -1,6 +1,7 @@
 package com.example.ecommercewebservice.domain.user.dto;
 
 import com.example.ecommercewebservice.domain.user.entity.User;
+import com.example.ecommercewebservice.domain.user.entity.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,8 +25,11 @@ public class LoginResponse {
                 .accessToken(accessToken)
                 .userId(user.getUserId())
                 .email(user.getEmail())
-                .username(user.getUsername())
-                .role(user.getRoles().getFirst())
+                .username(user.getActualUsername())
+                .role(user.getRoles().stream()
+                        .filter(role -> role.equals(UserRole.USER.getRole()))
+                        .findFirst()
+                        .orElse(user.getRoles().isEmpty() ? UserRole.USER.getRole() : user.getRoles().getFirst()))
                 .build();
     }
 } 
