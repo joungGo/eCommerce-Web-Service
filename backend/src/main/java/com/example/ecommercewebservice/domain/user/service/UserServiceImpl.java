@@ -117,4 +117,14 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
     }
+
+    @Override
+    @Transactional
+    public void updateUserRole(Long userId, UserRole role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+
+        user.getRoles().clear();
+        user.getRoles().add(role.getRole());
+    }
 }

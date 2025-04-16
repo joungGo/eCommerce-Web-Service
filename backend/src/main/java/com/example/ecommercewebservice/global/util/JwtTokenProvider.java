@@ -20,7 +20,9 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * JWT 토큰의 생성, 검증, 파싱 등을 담당하는 유틸리티 클래스
@@ -34,6 +36,8 @@ public class JwtTokenProvider {
     private long tokenValidityInMilliseconds;
     private String issuer;
     private TokenRepository tokenRepository;
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
 
     /**
      * 기본 생성자
@@ -169,5 +173,36 @@ public class JwtTokenProvider {
      */
     public void invalidateToken(String token) {
         tokenRepository.invalidateToken(token);
+    }
+
+    /**
+     * HTTP 요청에서 JWT 토큰을 추출
+     * 
+     * @param request HTTP 요청
+     * @return 추출된 JWT 토큰 또는 null
+     */
+    public String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_PREFIX.length());
+        }
+        return null;
+    }
+
+    /**
+     * JWT 토큰에서 사용자 역할을 추출
+     * 
+     * @param token JWT 토큰
+     * @return 사용자 역할 목록
+     */
+    public List<String> getRoles(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        String authorities = claims.get("auth", String.class);
+        return Arrays.asList(authorities.split(","));
     }
 } 

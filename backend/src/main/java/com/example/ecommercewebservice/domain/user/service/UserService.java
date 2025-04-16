@@ -3,7 +3,9 @@ package com.example.ecommercewebservice.domain.user.service;
 import com.example.ecommercewebservice.domain.user.dto.LoginRequest;
 import com.example.ecommercewebservice.domain.user.dto.LoginResponse;
 import com.example.ecommercewebservice.domain.user.dto.SignupRequest;
+import com.example.ecommercewebservice.domain.user.dto.UserRoleUpdateRequest;
 import com.example.ecommercewebservice.domain.user.entity.User;
+import com.example.ecommercewebservice.domain.user.entity.UserRole;
 
 public interface UserService {
     /**
@@ -29,4 +31,12 @@ public interface UserService {
      */
     void logout(String token);
 
+    /**
+     * 사용자 역할 변경
+     * 관리자만 호출 가능
+     *
+     * @param userId 변경할 사용자 ID
+     * @param role 새로운 역할
+     */
+    void updateUserRole(Long userId, UserRole role);
 }
