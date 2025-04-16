@@ -147,6 +147,6 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserProfileResponse getMyProfile(User user) {
         log.info("사용자 프로필 조회: {}", user.getEmail());
-        return UserProfileResponse.from(user);
+        return UserProfileResponse.from(user); // User를 UserProfileResponse로 변환
     }
 }

@@ -1,7 +1,12 @@
 package com.example.ecommercewebservice.global.util;
 
+import com.example.ecommercewebservice.domain.user.entity.User;
+import com.example.ecommercewebservice.domain.user.repository.UserRepository;
+import com.example.ecommercewebservice.global.util.repository.TokenRepository;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,12 +14,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import io.jsonwebtoken.io.Decoders;
-
-import com.example.ecommercewebservice.global.util.repository.TokenRepository;
 
 import java.security.Key;
 import java.util.Arrays;
@@ -22,7 +23,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * JWT 토큰의 생성, 검증, 파싱 등을 담당하는 유틸리티 클래스
@@ -36,6 +36,7 @@ public class JwtTokenProvider {
     private long tokenValidityInMilliseconds;
     private String issuer;
     private TokenRepository tokenRepository;
+    private UserRepository userRepository;
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
 
@@ -59,7 +60,8 @@ public class JwtTokenProvider {
         @Value("${jwt.secret}") String secret,
         @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds,
         @Value("${jwt.issuer}") String issuer,
-        TokenRepository tokenRepository) {
+        TokenRepository tokenRepository,
+        UserRepository userRepository) {
         
         // Base64로 인코딩된 시크릿 키를 디코딩하여 사용
         byte[] keyBytes = Decoders.BASE64.decode(secret);
@@ -67,7 +69,8 @@ public class JwtTokenProvider {
         this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
         this.issuer = issuer;
         this.tokenRepository = tokenRepository;
-        
+        this.userRepository = userRepository;
+
         log.info("JWT Token Provider initialized with issuer: {}", issuer);
     }
 
@@ -119,9 +122,11 @@ public class JwtTokenProvider {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        // Load the actual User entity from database with addresses
+        User user = userRepository.findByEmailWithAddresses(claims.getSubject())
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + claims.getSubject()));
 
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return new UsernamePasswordAuthenticationToken(user, token, authorities);
     }
 
     /**
