@@ -83,10 +83,13 @@ class UserControllerTest {
         // given
         SignupRequest signupRequest = new SignupRequest();
         signupRequest.setEmail("newuser@example.com");
+        signupRequest.setUsername("newUser");
         signupRequest.setPassword("NewPass123!");
-        signupRequest.setUsername("newuser");
         signupRequest.setPhoneNumber("010-1234-5678");
+        signupRequest.setRecipient("newUser");
+        signupRequest.setPostalCode("11111");
         signupRequest.setAddress("서울시 강남구");
+        signupRequest.setAddressPhoneNumber("010-1111-1111");
 
         // when
         ResultActions result = mockMvc.perform(post("/api/users/signup")
@@ -97,8 +100,12 @@ class UserControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.msg").value("회원가입이 완료되었습니다."))
+                .andExpect(jsonPath("$.data.userId").exists())
                 .andExpect(jsonPath("$.data.email").value("newuser@example.com"))
-                .andExpect(jsonPath("$.data.username").value("newuser"));
+                .andExpect(jsonPath("$.data.username").value("newUser"))
+                .andExpect(jsonPath("$.data.phoneNumber").value("010-1234-5678"))
+                .andExpect(jsonPath("$.data.role").value("USER"))
+                .andExpect(jsonPath("$.data.createdAt").exists());
     }
 
     @Test
