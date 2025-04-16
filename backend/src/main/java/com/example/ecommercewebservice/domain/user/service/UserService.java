@@ -1,11 +1,17 @@
 package com.example.ecommercewebservice.domain.user.service;
 
-import com.example.ecommercewebservice.domain.user.dto.profile.UserProfileResponse;
+import com.example.ecommercewebservice.domain.user.dto.response.UserProfileResponse;
+import com.example.ecommercewebservice.domain.user.dto.request.AddressUpdateRequestDto;
+import com.example.ecommercewebservice.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.ecommercewebservice.domain.user.dto.response.UserResponseDto;
 import com.example.ecommercewebservice.domain.user.dto.signIn.LoginRequest;
 import com.example.ecommercewebservice.domain.user.dto.signIn.LoginResponse;
 import com.example.ecommercewebservice.domain.user.dto.signUp.SignupRequest;
 import com.example.ecommercewebservice.domain.user.entity.User;
 import com.example.ecommercewebservice.config.UserRole;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface UserService {
     /**
@@ -47,4 +53,9 @@ public interface UserService {
      * @return UserProfileResponse 사용자 프로필 정보
      */
     UserProfileResponse getMyProfile(User user);
+
+    @Transactional
+    UserResponseDto updateProfile(Long userId, UserUpdateRequestDto request);
+
+    void updateAddresses(User user, List<AddressUpdateRequestDto> addressDtos);
 }

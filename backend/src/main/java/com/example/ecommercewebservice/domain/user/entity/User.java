@@ -138,4 +138,16 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 } 

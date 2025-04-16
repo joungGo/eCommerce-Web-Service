@@ -1,7 +1,9 @@
 package com.example.ecommercewebservice.domain.user.controller;
 
 import com.example.ecommercewebservice.config.UserRole;
-import com.example.ecommercewebservice.domain.user.dto.profile.UserProfileResponse;
+import com.example.ecommercewebservice.domain.user.dto.response.UserProfileResponse;
+import com.example.ecommercewebservice.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.ecommercewebservice.domain.user.dto.response.UserResponseDto;
 import com.example.ecommercewebservice.domain.user.dto.signIn.LoginRequest;
 import com.example.ecommercewebservice.domain.user.dto.signIn.LoginResponse;
 import com.example.ecommercewebservice.domain.user.dto.signUp.SignupRequest;
@@ -75,4 +77,17 @@ public class UserController {
     }
 
     // 사용자 프로필(정보) 수정
+    @PutMapping("/me")
+    @RoleRequired(UserRole.USER)
+    public ResponseEntity<RsData<UserResponseDto>> updateProfile(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody UserUpdateRequestDto request) {
+        UserResponseDto response = userService.updateProfile(user.getUserId(), request);
+        RsData<UserResponseDto> rsData = new RsData<>(
+                String.valueOf(HttpStatus.OK.value()),
+                "프로필 수정 성공",
+                response
+        );
+        return ResponseEntity.ok(rsData);
+    }
 }

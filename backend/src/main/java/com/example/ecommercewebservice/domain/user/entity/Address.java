@@ -41,4 +41,12 @@ public class Address {
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime createdAt; // 생성일시
+
+    public void update(String recipient, String postalCode, String address, String phone, boolean isDefault) {
+        this.recipient = recipient;
+        this.postalCode = postalCode;
+        this.address = address;
+        this.phoneNumber = phone;
+        this.isDefault = isDefault;
+    }
 }

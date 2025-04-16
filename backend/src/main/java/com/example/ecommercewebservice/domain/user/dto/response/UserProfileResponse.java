@@ -1,6 +1,5 @@
-package com.example.ecommercewebservice.domain.user.dto.profile;
+package com.example.ecommercewebservice.domain.user.dto.response;
 
-import com.example.ecommercewebservice.domain.user.dto.adress.AddressResponse;
 import com.example.ecommercewebservice.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

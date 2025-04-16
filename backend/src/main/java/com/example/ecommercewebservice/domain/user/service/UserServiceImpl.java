@@ -1,9 +1,12 @@
 package com.example.ecommercewebservice.domain.user.service;
 
-import com.example.ecommercewebservice.domain.user.dto.profile.UserProfileResponse;
+import com.example.ecommercewebservice.domain.user.dto.response.UserProfileResponse;
 import com.example.ecommercewebservice.domain.user.dto.signIn.LoginRequest;
 import com.example.ecommercewebservice.domain.user.dto.signIn.LoginResponse;
 import com.example.ecommercewebservice.domain.user.dto.signUp.SignupRequest;
+import com.example.ecommercewebservice.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.ecommercewebservice.domain.user.dto.request.AddressUpdateRequestDto;
+import com.example.ecommercewebservice.domain.user.dto.response.UserResponseDto;
 import com.example.ecommercewebservice.domain.user.entity.Address;
 import com.example.ecommercewebservice.domain.user.entity.User;
 import com.example.ecommercewebservice.config.UserRole;
@@ -20,7 +23,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
 
 @Service
 @Slf4j
@@ -148,5 +154,77 @@ public class UserServiceImpl implements UserService {
     public UserProfileResponse getMyProfile(User user) {
         log.info("사용자 프로필 조회: {}", user.getEmail());
         return UserProfileResponse.from(user); // User를 UserProfileResponse로 변환
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto updateProfile(Long userId, UserUpdateRequestDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // 선택적 필드 업데이트
+        if (request.getPassword() != null) {
+            user.updatePassword(passwordEncoder.encode(request.getPassword()));
+        }
+        if (request.getUsername() != null) {
+            user.updateUsername(request.getUsername());
+        }
+        if (request.getPhoneNumber() != null) {
+            user.updatePhoneNumber(request.getPhoneNumber());
+        }
+
+        // 주소 업데이트
+        if (request.getAddresses() != null) {
+            updateAddresses(user, request.getAddresses());
+        }
+
+        return UserResponseDto.from(user);
+    }
+
+    public void updateAddresses(User user, List<AddressUpdateRequestDto> addressDtos) {
+        List<Address> existingAddresses = user.getAddresses();
+        List<Address> newAddresses = new ArrayList<>();
+
+        // 기본 주소 개수 확인
+        long defaultAddressCount = addressDtos.stream()
+                .filter(AddressUpdateRequestDto::isDefault)
+                .count();
+        if (defaultAddressCount != 1) {
+            throw new BusinessException(ErrorCode.INVALID_DEFAULT_ADDRESS);
+        }
+
+        for (AddressUpdateRequestDto dto : addressDtos) {
+            if (dto.getAddressId() == null) {
+                // 새 주소 추가
+                Address newAddress = Address.builder()
+                        .recipient(dto.getRecipient())
+                        .postalCode(dto.getPostalCode())
+                        .address(dto.getAddress())
+                        .phoneNumber(dto.getPhone())
+                        .isDefault(dto.isDefault())
+                        .user(user)
+                        .build();
+                newAddresses.add(newAddress);
+            } else {
+                // 기존 주소 수정
+                Address existingAddress = existingAddresses.stream()
+                        .filter(address -> address.getAddressId().equals(dto.getAddressId()))
+                        .findFirst()
+                        .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
+                
+                existingAddress.update(
+                        dto.getRecipient(),
+                        dto.getPostalCode(),
+                        dto.getAddress(),
+                        dto.getPhone(),
+                        dto.isDefault()
+                );
+                newAddresses.add(existingAddress);
+            }
+        }
+
+        // 기존 주소 목록을 새로운 주소 목록으로 교체
+        existingAddresses.clear();
+        existingAddresses.addAll(newAddresses);
     }
 }
