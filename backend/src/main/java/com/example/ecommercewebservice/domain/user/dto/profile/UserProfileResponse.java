@@ -1,38 +1,40 @@
-package com.example.ecommercewebservice.domain.user.dto;
+package com.example.ecommercewebservice.domain.user.dto.profile;
 
+import com.example.ecommercewebservice.domain.user.dto.adress.AddressResponse;
 import com.example.ecommercewebservice.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SignupResponse {
+public class UserProfileResponse {
     private Long userId;
     private String email;
     private String username;
-    private String role;
     private String phoneNumber;
-    private String address;
-    
-    @CreatedDate
+    private List<AddressResponse> addresses;
+    private String role;
     private LocalDateTime createdAt;
 
-    public static SignupResponse from(User user) {
-        return SignupResponse.builder()
+    public static UserProfileResponse from(User user) {
+        return UserProfileResponse.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .username(user.getActualUsername())
                 .phoneNumber(user.getPhoneNumber())
-                .address(user.getAddress())
-                .role(user.getRoles().getFirst()) // 첫 번째 역할을 사용
+                .addresses(user.getAddresses().stream()
+                        .map(AddressResponse::from)
+                        .collect(Collectors.toList()))
+                .role(user.getRoles().getFirst())
                 .createdAt(user.getCreatedAt())
                 .build();
     }
-} 
+}

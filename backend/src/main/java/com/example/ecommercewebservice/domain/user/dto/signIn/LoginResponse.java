@@ -1,13 +1,11 @@
-package com.example.ecommercewebservice.domain.user.dto;
+package com.example.ecommercewebservice.domain.user.dto.signIn;
 
 import com.example.ecommercewebservice.domain.user.entity.User;
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor

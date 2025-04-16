@@ -1,11 +1,10 @@
 package com.example.ecommercewebservice.domain.user.controller;
 
-import com.example.ecommercewebservice.domain.user.dto.LoginRequest;
-import com.example.ecommercewebservice.domain.user.dto.SignupRequest;
+import com.example.ecommercewebservice.domain.user.dto.signIn.LoginRequest;
+import com.example.ecommercewebservice.domain.user.dto.signUp.SignupRequest;
 import com.example.ecommercewebservice.domain.user.entity.User;
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 import com.example.ecommercewebservice.domain.user.repository.UserRepository;
-import com.example.ecommercewebservice.domain.user.service.UserService;
 import com.example.ecommercewebservice.global.util.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

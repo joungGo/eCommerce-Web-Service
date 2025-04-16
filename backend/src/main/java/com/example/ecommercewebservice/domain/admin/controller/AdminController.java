@@ -3,7 +3,7 @@ package com.example.ecommercewebservice.domain.admin.controller;
 import com.example.ecommercewebservice.domain.user.dto.UserRoleUpdateRequest;
 import com.example.ecommercewebservice.domain.user.service.UserService;
 import com.example.ecommercewebservice.global.security.annotation.RoleRequired;
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

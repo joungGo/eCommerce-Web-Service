@@ -1,6 +1,6 @@
 package com.example.ecommercewebservice.global.security.aspect;
 
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 import com.example.ecommercewebservice.global.security.annotation.RoleRequired;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

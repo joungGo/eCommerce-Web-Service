@@ -1,10 +1,12 @@
 package com.example.ecommercewebservice.domain.user.service;
 
-import com.example.ecommercewebservice.domain.user.dto.LoginRequest;
-import com.example.ecommercewebservice.domain.user.dto.LoginResponse;
-import com.example.ecommercewebservice.domain.user.dto.SignupRequest;
+import com.example.ecommercewebservice.domain.user.dto.profile.UserProfileResponse;
+import com.example.ecommercewebservice.domain.user.dto.signIn.LoginRequest;
+import com.example.ecommercewebservice.domain.user.dto.signIn.LoginResponse;
+import com.example.ecommercewebservice.domain.user.dto.signUp.SignupRequest;
+import com.example.ecommercewebservice.domain.user.entity.Address;
 import com.example.ecommercewebservice.domain.user.entity.User;
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 import com.example.ecommercewebservice.domain.user.repository.UserRepository;
 import com.example.ecommercewebservice.global.exception.BusinessException;
 import com.example.ecommercewebservice.global.exception.ErrorCode;
@@ -14,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,18 +52,31 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.USERNAME_ALREADY_EXISTS);
         }
 
-        // 사용자 엔티티 생성 및 저장
+        // 사용자 엔티티 생성
         User user = User.builder()
                 .email(signupRequest.getEmail())
                 .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .phoneNumber(signupRequest.getPhoneNumber())
-                .address(signupRequest.getAddress())
                 .username(signupRequest.getUsername())
                 .roles(Collections.singletonList(UserRole.USER.getRole()))
                 .build();
 
+        // 기본 배송지 생성
+        Address defaultAddress = Address.builder()
+                .user(user)
+                .recipient(signupRequest.getRecipient())
+                .postalCode(signupRequest.getPostalCode())
+                .address(signupRequest.getAddress())
+                .phoneNumber(signupRequest.getAddressPhoneNumber())
+                .isDefault(true)
+                .build();
+
+        // 사용자와 배송지 저장
+        user.getAddresses().add(defaultAddress);
+        User savedUser = userRepository.save(user);
+
         log.info("새로운 사용자의 회원가입: {}", signupRequest.getEmail());
-        return userRepository.save(user);
+        return savedUser;
     }
 
     /**
@@ -126,5 +140,13 @@ public class UserServiceImpl implements UserService {
 
         user.getRoles().clear();
         user.getRoles().add(role.getRole());
+    }
+
+    // 현재 로그인한 사용자의 프로필 정보 조회
+    @Override
+    @Transactional(readOnly = true)
+    public UserProfileResponse getMyProfile(User user) {
+        log.info("사용자 프로필 조회: {}", user.getEmail());
+        return UserProfileResponse.from(user);
     }
 }

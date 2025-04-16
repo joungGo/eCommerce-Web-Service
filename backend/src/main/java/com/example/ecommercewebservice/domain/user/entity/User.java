@@ -43,7 +43,17 @@ public class User implements UserDetails {
 
     private String phoneNumber;
 
-    private String address;
+    /**
+     * 배송지 목록
+     * CascadeType.ALL: 부모 엔티티의 상태 변경을 자식 엔티티에 전파
+     * orphanRemoval = true: 부모와의 관계가 끊어진 자식 엔티티를 자동으로 삭제
+     * [CascadeType vs orphanRemoval]
+     * 1. 부모 엔티티의 상태 변경이 자식에게 전파되고
+     * 2. 관계가 끊어진 자식 엔티티가 자동으로 삭제되어
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) // orphanRemoval = true: 자식 엔티티가 부모 엔티티와의 관계를 끊으면 자동으로 삭제
+    @Builder.Default // 이것이 없다면 @Builder가 생성하는 빌더는 이 초기값을 무시하기 때문에 null이 된다.
+    private List<Address> addresses = new ArrayList<>(); // 빌더 패턴을 사용할 때 addresses 필드가 명시적으로 설정되지 않으면 new ArrayList<>()를 기본값으로 사용
 
 //    private String profileImage;
 

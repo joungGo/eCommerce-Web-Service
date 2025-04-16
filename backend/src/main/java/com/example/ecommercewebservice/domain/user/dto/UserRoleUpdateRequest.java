@@ -1,6 +1,6 @@
 package com.example.ecommercewebservice.domain.user.dto;
 
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

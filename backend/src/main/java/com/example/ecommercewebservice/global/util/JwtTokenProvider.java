@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.io.Decoders;
 
-import com.example.ecommercewebservice.domain.token.repository.TokenRepository;
+import com.example.ecommercewebservice.global.util.repository.TokenRepository;
 
 import java.security.Key;
 import java.util.Arrays;

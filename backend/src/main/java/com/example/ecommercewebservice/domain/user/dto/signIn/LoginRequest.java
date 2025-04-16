@@ -1,4 +1,4 @@
-package com.example.ecommercewebservice.domain.user.dto;
+package com.example.ecommercewebservice.domain.user.dto.signIn;
 
 import com.example.ecommercewebservice.global.constant.MessageConstants;
 import jakarta.validation.constraints.Email;

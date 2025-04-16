@@ -1,4 +1,4 @@
-package com.example.ecommercewebservice.domain.user.entity;
+package com.example.ecommercewebservice.config;
 
 import lombok.Getter;
 

@@ -28,4 +28,11 @@ public class MessageConstants {
     public static final String TOKEN_EXPIRED = "만료된 토큰입니다.";
     public static final String INVALID_TOKEN = "유효하지 않은 토큰입니다.";
     public static final String ACCESS_DENIED = "접근 권한이 없습니다.";
+
+    // Address validation messages
+    public static final String RECIPIENT_REQUIRED = "수령인 이름은 필수입니다.";
+    public static final String POSTAL_CODE_REQUIRED = "우편번호는 필수입니다.";
+    public static final String INVALID_POSTAL_CODE = "유효하지 않은 우편번호 형식입니다.";
+    public static final String ADDRESS_REQUIRED = "주소는 필수입니다.";
+    public static final String ADDRESS_PHONE_REQUIRED = "배송지 전화번호는 필수입니다.";
 } 
