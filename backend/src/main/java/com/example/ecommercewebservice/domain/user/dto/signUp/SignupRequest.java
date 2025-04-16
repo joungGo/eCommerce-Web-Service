@@ -1,4 +1,4 @@
-package com.example.ecommercewebservice.domain.user.dto;
+package com.example.ecommercewebservice.domain.user.dto.signUp;
 
 import com.example.ecommercewebservice.global.constant.MessageConstants;
 import jakarta.validation.constraints.Email;
@@ -57,15 +57,20 @@ public class SignupRequest {
     private String phoneNumber;
 
     /**
-     * 회원가입에 사용되는 주소
-     * 사용자 계정의 추가 정보로 사용됨
+     * 회원가입 시 기본 배송지 정보
      */
-    @Size(max = 200, message = MessageConstants.INVALID_ADDRESS_LENGTH)
-    private String address;
+    @NotBlank(message = MessageConstants.RECIPIENT_REQUIRED)
+    private String recipient;  // 수령인 이름
 
-    /**
-     * 회원가입에 사용되는 프로필 이미지 URL
-     * 사용자 계정의 추가 정보로 사용됨
-     */
-//    private String profileImage;
+    @NotBlank(message = MessageConstants.POSTAL_CODE_REQUIRED)
+    @Pattern(regexp = "^\\d{5}$", message = MessageConstants.INVALID_POSTAL_CODE)
+    private String postalCode;  // 우편번호
+
+    @NotBlank(message = MessageConstants.ADDRESS_REQUIRED)
+    @Size(max = 200, message = MessageConstants.INVALID_ADDRESS_LENGTH)
+    private String address;  // 주소
+
+    @NotBlank(message = MessageConstants.ADDRESS_PHONE_REQUIRED)
+    @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = MessageConstants.INVALID_PHONE_NUMBER)
+    private String addressPhoneNumber;  // 배송지 전화번호
 } 

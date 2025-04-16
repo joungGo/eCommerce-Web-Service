@@ -1,6 +1,6 @@
-package com.example.ecommercewebservice.domain.token.repository;
+package com.example.ecommercewebservice.global.util.repository;
 
-import com.example.ecommercewebservice.domain.redis.RedisCommon;
+import com.example.ecommercewebservice.config.redis.RedisCommon;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

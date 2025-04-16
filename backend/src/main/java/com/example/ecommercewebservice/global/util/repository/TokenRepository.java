@@ -1,4 +1,4 @@
-package com.example.ecommercewebservice.domain.token.repository;
+package com.example.ecommercewebservice.global.util.repository;
 
 /**
  * JWT 토큰 관리를 위한 저장소 인터페이스

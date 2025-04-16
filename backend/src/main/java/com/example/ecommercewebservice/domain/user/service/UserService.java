@@ -1,11 +1,17 @@
 package com.example.ecommercewebservice.domain.user.service;
 
-import com.example.ecommercewebservice.domain.user.dto.LoginRequest;
-import com.example.ecommercewebservice.domain.user.dto.LoginResponse;
-import com.example.ecommercewebservice.domain.user.dto.SignupRequest;
-import com.example.ecommercewebservice.domain.user.dto.UserRoleUpdateRequest;
+import com.example.ecommercewebservice.domain.user.dto.response.UserProfileResponse;
+import com.example.ecommercewebservice.domain.user.dto.request.AddressUpdateRequestDto;
+import com.example.ecommercewebservice.domain.user.dto.request.UserUpdateRequestDto;
+import com.example.ecommercewebservice.domain.user.dto.response.UserResponseDto;
+import com.example.ecommercewebservice.domain.user.dto.signIn.LoginRequest;
+import com.example.ecommercewebservice.domain.user.dto.signIn.LoginResponse;
+import com.example.ecommercewebservice.domain.user.dto.signUp.SignupRequest;
 import com.example.ecommercewebservice.domain.user.entity.User;
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public interface UserService {
     /**
@@ -39,4 +45,17 @@ public interface UserService {
      * @param role 새로운 역할
      */
     void updateUserRole(Long userId, UserRole role);
+
+    /**
+     * 현재 로그인한 사용자의 프로필 정보 조회
+     *
+     * @param user 현재 로그인한 사용자
+     * @return UserProfileResponse 사용자 프로필 정보
+     */
+    UserProfileResponse getMyProfile(User user);
+
+    @Transactional
+    UserResponseDto updateProfile(Long userId, UserUpdateRequestDto request);
+
+    void updateAddresses(User user, List<AddressUpdateRequestDto> addressDtos);
 }

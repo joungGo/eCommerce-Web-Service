@@ -1,11 +1,10 @@
 package com.example.ecommercewebservice.domain.user.controller;
 
-import com.example.ecommercewebservice.domain.user.dto.LoginRequest;
-import com.example.ecommercewebservice.domain.user.dto.SignupRequest;
+import com.example.ecommercewebservice.domain.user.dto.signIn.LoginRequest;
+import com.example.ecommercewebservice.domain.user.dto.signUp.SignupRequest;
 import com.example.ecommercewebservice.domain.user.entity.User;
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 import com.example.ecommercewebservice.domain.user.repository.UserRepository;
-import com.example.ecommercewebservice.domain.user.service.UserService;
 import com.example.ecommercewebservice.global.util.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,10 +83,13 @@ class UserControllerTest {
         // given
         SignupRequest signupRequest = new SignupRequest();
         signupRequest.setEmail("newuser@example.com");
+        signupRequest.setUsername("newUser");
         signupRequest.setPassword("NewPass123!");
-        signupRequest.setUsername("newuser");
         signupRequest.setPhoneNumber("010-1234-5678");
+        signupRequest.setRecipient("newUser");
+        signupRequest.setPostalCode("11111");
         signupRequest.setAddress("서울시 강남구");
+        signupRequest.setAddressPhoneNumber("010-1111-1111");
 
         // when
         ResultActions result = mockMvc.perform(post("/api/users/signup")
@@ -98,8 +100,12 @@ class UserControllerTest {
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.msg").value("회원가입이 완료되었습니다."))
+                .andExpect(jsonPath("$.data.userId").exists())
                 .andExpect(jsonPath("$.data.email").value("newuser@example.com"))
-                .andExpect(jsonPath("$.data.username").value("newuser"));
+                .andExpect(jsonPath("$.data.username").value("newUser"))
+                .andExpect(jsonPath("$.data.phoneNumber").value("010-1234-5678"))
+                .andExpect(jsonPath("$.data.role").value("USER"))
+                .andExpect(jsonPath("$.data.createdAt").exists());
     }
 
     @Test

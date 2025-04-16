@@ -117,6 +117,6 @@ public class SecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web
                 .ignoring()
-                .requestMatchers("/h2-console/**", "/static/**", "/css/**", "/js/**", "/images/**");
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**");
     }
 } 

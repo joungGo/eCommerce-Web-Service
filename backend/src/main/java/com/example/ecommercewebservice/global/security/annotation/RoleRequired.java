@@ -1,6 +1,6 @@
 package com.example.ecommercewebservice.global.security.annotation;
 
-import com.example.ecommercewebservice.domain.user.entity.UserRole;
+import com.example.ecommercewebservice.config.UserRole;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

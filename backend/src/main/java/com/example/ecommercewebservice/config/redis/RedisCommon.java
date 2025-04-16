@@ -1,4 +1,4 @@
-package com.example.ecommercewebservice.domain.redis;
+package com.example.ecommercewebservice.config.redis;
 
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
