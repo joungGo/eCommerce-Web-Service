@@ -7,6 +7,7 @@ on:
       - develop  # develop 브랜치에 푸시가 있을 때
       - feat/* # feat 브랜치에 푸시가 있을 때
       - test/* # test 브랜치에 푸시가 있을 때
+      - build/* # build 브랜치에 푸시가 있을 때
     paths: 'backend/**'  # backend 폴더 내 파일이 변경될 때만 실행
   pull_request:
     branches:
