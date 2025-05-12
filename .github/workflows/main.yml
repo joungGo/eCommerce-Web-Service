@@ -54,7 +54,7 @@ jobs:
 
       - name: 테스트 실패 시, 실패한 코드 라인에 Check 코멘트를 등록합니다
         uses: mikepenz/action-junit-report@v3  # 테스트 실패 시, 실패한 코드 라인에 체크 코멘트를 등록하는 액션
-        if: always()  # 항상 실행하도록 설정 (성공 여부에 관계없이)
+        if: failure()  # 항상 실행하도록 설정 (성공 여부에 관계없이)
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'  # 테스트 결과 파일 경로
           token: ${{ github.token }}  # GitHub 인증 토큰을 사용하여 API 호출
