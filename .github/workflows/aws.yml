@@ -1,14 +1,12 @@
-name: eCommerce_web deploy to aws  # GitHub Actions 워크플로우의 이름. eCommerce 웹 애플리케이션을 AWS에 배포하기 위한 워크플로우
+name: 백엔드 AWS 배포 파이프라인 구현  # GitHub Actions 워크플로우의 이름. eCommerce 웹 애플리케이션을 AWS에 배포하기 위한 워크플로우
 
 on:
-  push:  # 코드가 main 브랜치로 푸시될 때 워크플로우 실행
+  workflow_run:
+    workflows: ["백엔드 CI 테스트 코드 자동화"]
+    types:
+      - completed
     branches:
-      - main  # main 브랜치로의 푸시 이벤트 감지
-      - develop
-  pull_request:  # main 브랜치로의 풀 리퀘스트가 생성될 때 워크플로우 실행
-    branches:
-      - main  # main 브랜치로의 풀 리퀘스트 이벤트 감지
-      - develop
+      - main
 
 jobs:
   build:  # 'build'라는 이름의 job 정의. 빌드 및 배포 작업을 수행
@@ -38,11 +36,11 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle  # 복원 가능한 캐시 키 접두사 지정
 
       - name: Make gradlew executable  # Step 4: Gradle Wrapper 실행 권한 부여
-        run: chmod +x backEnd/gradlew  # backEnd 디렉토리의 gradlew 스크립트에 실행 권한 추가
+        run: chmod +x backend/gradlew  # backend 디렉토리의 gradlew 스크립트에 실행 권한 추가
 
       - name: Build with Gradle  # Step 5: Gradle로 프로젝트 빌드
-        working-directory: backEnd  # 작업 디렉토리를 backEnd로 설정
-        run: ./gradlew clean build  # Gradle 명령어를 실행하여 프로젝트 정리(clean) 및 빌드(build)
+        working-directory: backend  # 작업 디렉토리를 backend로 설정
+        run: ./gradlew clean build -x test  # Gradle 명령어를 실행하여 프로젝트 정리(clean) 및 빌드(build)
 
       - name: Login to Docker Hub  # Step 6: Docker Hub에 로그인
         uses: docker/login-action@v3  # Docker 로그인 액션(v3) 사용
@@ -51,7 +49,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}  # GitHub Secrets에 저장된 Docker Hub 비밀번호
 
       - name: Build Docker image  # Step 7: Docker 이미지 빌드
-        working-directory: backEnd  # 작업 디렉토리를 backEnd로 설정
+        working-directory: backend  # 작업 디렉토리를 backend로 설정
         run: |
           docker build . -t ${{ secrets.DOCKER_USERNAME }}/ecommerce:${{ github.sha }}  # 현재 디렉토리에서 Docker 이미지 빌드, GitHub 커밋 SHA로 태그 지정
           docker tag ${{ secrets.DOCKER_USERNAME }}/ecommerce:${{ github.sha }} ${{ secrets.DOCKER_USERNAME }}/ecommerce:v${{ github.run_number }}  # 동일한 이미지를 빌드 번호로 태그 추가
@@ -62,7 +60,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/ecommerce:v${{ github.run_number }}  # 빌드 번호 태그가 붙은 이미지 푸시
 
       - name: Deploy to server  # Step 9: 서버에 배포
-        uses: appleboy/ssh-action@v1.0.4  # SSH 액션(v1.0.4)을 사용하여 원격 서버에 접속
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_SERVER }}  # GitHub Secrets에 저장된 배포 서버 주소
           username: ${{ secrets.SSH_USER }}  # GitHub Secrets에 저장된 SSH 사용자 이름
