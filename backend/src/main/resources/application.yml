@@ -1,34 +1,41 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+
 spring:
-  application:
-    name: eCommerce-Web-Service
   profiles:
     active: dev
+    include: secret
+  data:
+    redis:
+      port: ${redis.port}
+      host: ${redis.host}
+      password: ${redis.password}
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${db.url}
+    username: ${db.username}
+    password: ${db.password}
+    hikari:
+      auto-commit: false
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: "pk2258"
+        highlight_sql: true
+        use_sql_comments: true
+        default_batch_fetch_size: 100
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: false
 
 jwt:
-  secret: c2VjcmV0LWtleS1mb3ItanNvbi13ZWItdG9rZW4tc2lnbmluZy1rZXktZm9yLXNwcmluZy1zZWN1cml0eS1qd3Q=
   token-validity-in-seconds: 86400 # JWT 토큰의 유효 기간
   issuer: eCommerce-Web-Service
 

@@ -39,3 +39,11 @@ out/
 ### SpringBoot ###
 src/main/resources/application-dev.yml
 src/main/resources/application-secret.yml
+
+### cursor ###
+.cursor/*
+.cursor/rules/*
+.cursor/rules/backend-rule.mdc
+
+### etc ###
+docker-compose.yml

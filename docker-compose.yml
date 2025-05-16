@@ -9,7 +9,7 @@ services:  # 서비스 정의
     container_name: redis  # 컨테이너 이름 설정
     image: redis:7.4  # Redis 이미지 버전 7.4 사용
     ports:
-      - "6379:6379"  # 호스트와 컨테이너 간 포트 매핑 (6379 포트)
+      - "6380:6379"  # 호스트와 컨테이너 간 포트 매핑 (6379 포트)
     command: ["redis-server", "--requirepass", "pk2258"]  # 비밀번호 설정
     networks:
       - monitor  # 'monitor' 네트워크에 연결
