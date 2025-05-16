@@ -63,9 +63,8 @@ public class JwtTokenProvider {
         TokenRepository tokenRepository,
         UserRepository userRepository) {
         
-        // Base64로 인코딩된 시크릿 키를 디코딩하여 사용
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        // HS512 알고리즘에 맞는 안전한 키 생성
+        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
         this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
         this.issuer = issuer;
         this.tokenRepository = tokenRepository;
